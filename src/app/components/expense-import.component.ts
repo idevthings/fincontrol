@@ -30,6 +30,9 @@ import { FileProcessingResult, ExpenseImportResult } from '../models/expense.mod
           <div class="file-info">
             <h3>Selected File: {{ selectedFile.name }}</h3>
             <p>Size: {{ formatFileSize(selectedFile.size) }}</p>
+            @if (processingResult && processingResult.metadata && processingResult.metadata.bankFormat && processingResult.metadata.bankFormat !== 'generic') {
+              <p class="bank-format">Detected: <strong>{{ processingResult.metadata.bankFormat | titlecase }} Bank Format</strong></p>
+            }
           </div>
 
           <div class="action-buttons">
@@ -198,6 +201,11 @@ import { FileProcessingResult, ExpenseImportResult } from '../models/expense.mod
     .file-info p {
       margin: 0;
       color: #6b7280;
+    }
+
+    .bank-format {
+      color: #059669;
+      font-weight: 500;
     }
 
     .action-buttons {
@@ -412,19 +420,26 @@ export class ExpenseImportComponent {
   async processFile(): Promise<void> {
     if (!this.selectedFile) return;
 
+    console.log('[ExpenseImport] Starting file processing for:', this.selectedFile.name);
     this.isProcessing = true;
     this.processingResult = null;
     this.importResult = null;
 
     try {
+      console.log('[ExpenseImport] Calling fileProcessingService.processFile()');
       // Process the file
       this.processingResult = await this.fileProcessingService.processFile(this.selectedFile);
+      console.log('[ExpenseImport] File processing completed. Expenses found:', this.processingResult.expenses.length);
 
       // Automatically import if there are valid expenses and no configuration errors
       if (this.processingResult.expenses.length > 0 && !this.hasConfigurationError) {
+        console.log('[ExpenseImport] Starting automatic import of', this.processingResult.expenses.length, 'expenses');
         await this.importProcessedData();
+      } else {
+        console.log('[ExpenseImport] Skipping import - expenses:', this.processingResult.expenses.length, 'config error:', this.hasConfigurationError);
       }
     } catch (error) {
+      console.error('[ExpenseImport] Error in processFile:', error);
       this.errorService.handleError(error, 'File Processing');
       this.processingResult = {
         expenses: [],
@@ -437,17 +452,26 @@ export class ExpenseImportComponent {
         }
       };
     } finally {
+      console.log('[ExpenseImport] processFile completed, setting isProcessing to false');
       this.isProcessing = false;
     }
   }
 
   async importProcessedData(): Promise<void> {
-    if (!this.processingResult?.expenses.length) return;
+    if (!this.processingResult?.expenses.length) {
+      console.log('[ExpenseImport] No expenses to import');
+      return;
+    }
 
+    console.log('[ExpenseImport] Starting import of', this.processingResult.expenses.length, 'expenses');
     this.isImporting = true;
+
     try {
+      console.log('[ExpenseImport] Calling expenseService.importExpenses()');
       this.importResult = await this.expenseService.importExpenses(this.processingResult.expenses);
+      console.log('[ExpenseImport] Import completed. Success:', this.importResult.success, 'Imported:', this.importResult.totalImported);
     } catch (error) {
+      console.error('[ExpenseImport] Error in importProcessedData:', error);
       this.errorService.handleError(error, 'Data Import');
       this.importResult = {
         success: false,
@@ -456,6 +480,7 @@ export class ExpenseImportComponent {
         totalImported: 0
       };
     } finally {
+      console.log('[ExpenseImport] importProcessedData completed, setting isImporting to false');
       this.isImporting = false;
     }
   }

@@ -96,7 +96,19 @@ Navigate to `http://localhost:4200/`. The app will automatically reload when you
 
 ### CSV Format Support
 
-The app supports flexible CSV formats. Here are the expected column names (case-insensitive):
+The app supports multiple CSV formats including **Ibercaja bank statements** and generic CSV files.
+
+#### Ibercaja Bank Format
+The app automatically detects and parses Ibercaja CSV exports with:
+- Spanish date format (DD-MM-YYYY)
+- Semicolon-separated values (;)
+- Spanish number formatting (comma as decimal separator)
+- EUR currency detection
+- All transactions categorized as "Uncategorized" (manual categorization recommended)
+- **Powered by PapaParse** for robust CSV parsing with proper handling of quoted fields
+
+#### Generic CSV Format
+For other banks, the app supports flexible column names (case-insensitive):
 
 **Required Fields:**
 - `date` or `Date` or `transaction_date` or `Transaction Date`
@@ -251,13 +263,31 @@ The build artifacts will be stored in the `dist/fincontrol/` directory.
 
 ## Testing
 
-```bash
-# Unit tests
-ng test
+The project uses Angular's standard testing framework with Jasmine and Karma:
 
-# End-to-end tests
-ng e2e
+### Development Testing
+```bash
+npm test
 ```
+Runs tests in watch mode with Chrome browser for development.
+
+### CI/CD Testing
+```bash
+npm run test:ci
+```
+Runs tests once in headless Chrome for CI/CD pipelines.
+
+### Test Structure
+- **Unit Tests**: Test individual functions and services
+- **Integration Tests**: Test component interactions and service integration
+- **E2E Tests**: End-to-end user workflow testing (not implemented yet)
+
+### Testing Framework
+- **Jasmine**: BDD testing framework for writing test specs
+- **Karma**: Test runner that launches browsers and reports results
+- **Angular Testing Utilities**: TestBed, ComponentFixture, etc.
+
+The existing `.spec.ts` files contain proper Angular unit and integration tests using the standard Angular testing utilities.
 
 ## Contributing
 

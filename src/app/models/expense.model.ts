@@ -27,5 +27,6 @@ export interface FileProcessingResult {
     validRows: number;
     invalidRows: number;
     fileType: 'csv' | 'json';
+    bankFormat?: string;
   };
 }

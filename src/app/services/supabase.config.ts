@@ -9,11 +9,14 @@ export class SupabaseConfig {
   private supabase: SupabaseClient;
 
   constructor() {
+    console.log('[SupabaseConfig] Initializing Supabase client');
     this.validateEnvironment();
+    console.log('[SupabaseConfig] Environment validated successfully');
     this.supabase = createClient(
       environment.supabaseUrl,
       environment.supabaseKey
     );
+    console.log('[SupabaseConfig] Supabase client created');
   }
 
   get client(): SupabaseClient {

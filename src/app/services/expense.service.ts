@@ -9,13 +9,18 @@ export class ExpenseService {
   constructor(private supabaseConfig: SupabaseConfig) {}
 
   async importExpenses(expenses: Expense[]): Promise<ExpenseImportResult> {
+    console.log('[ExpenseService] Starting import of', expenses.length, 'expenses');
+    console.log('[ExpenseService] First expense sample:', expenses[0]);
+
     try {
+      console.log('[ExpenseService] Calling Supabase insert...');
       const { data, error } = await this.supabaseConfig.client
         .from('expenses')
         .insert(expenses)
         .select();
 
       if (error) {
+        console.error('[ExpenseService] Supabase error:', error);
         return {
           success: false,
           errors: [error.message],
@@ -24,6 +29,7 @@ export class ExpenseService {
         };
       }
 
+      console.log('[ExpenseService] Supabase insert successful. Data length:', data?.length);
       return {
         success: true,
         data: data || [],
@@ -31,6 +37,7 @@ export class ExpenseService {
         totalImported: data?.length || 0
       };
     } catch (error) {
+      console.error('[ExpenseService] Exception in importExpenses:', error);
       return {
         success: false,
         errors: [error instanceof Error ? error.message : 'Unknown error'],
