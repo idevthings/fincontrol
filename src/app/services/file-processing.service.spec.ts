@@ -196,6 +196,144 @@ Nº Orden,Fecha Oper,Fecha Valor,Concepto,Descripción,Referencia,Importe,Saldo
     });
   });
 
+  describe('Trade Republic CSV Processing', () => {
+    const tradeRepublicCSVData = `timestamp;formatted_timestamp;title;subtitle;value;currency
+2025-09-06T11:19:00.528Z;2025-09-06T11:19:00.528Z;ANDITEC- NAVARRALANPARTY;;-1.50;EUR
+2025-09-06T08:14:05.121Z;2025-09-06T08:14:05.121Z;LA TERRAZA DE NOA;;-8.75;EUR
+2025-09-05T21:02:38.243Z;2025-09-05T21:02:38.243Z;SAKURA LIU S.SL.;;-33.40;EUR
+2025-09-04T10:24:30.247Z;2025-09-04T10:24:30.247Z;Lupe;Bizum;-20.00;EUR
+2025-09-02T20:57:12.829Z;2025-09-02T20:57:12.829Z;McDonald's;;-22.17;EUR
+2025-09-01T11:19:18.033Z;2025-09-01T11:19:18.033Z;Interest;2 % p.a.;54.86;EUR`;
+
+    it('should detect Trade Republic format correctly', async () => {
+      // Arrange
+      const csvFile = new File([tradeRepublicCSVData], 'traderepublic.csv', { type: 'text/csv' });
+      
+      Object.defineProperty(csvFile, 'text', {
+        value: vi.fn().mockResolvedValue(tradeRepublicCSVData)
+      });
+
+      // Mock PapaParse for Trade Republic format
+      mockPapaParse.parse.mockImplementation((text, config) => {
+        const lines = text.split('\n');
+        const headers = lines[0].split(';');
+        const data = lines.slice(1).map((line: string) => {
+          const values = line.split(';');
+          const row: any = {};
+          headers.forEach((header: string, index: number) => {
+            row[header] = values[index];
+          });
+          return row;
+        });
+        
+        config.complete({
+          data,
+          errors: []
+        });
+      });
+
+      // Act
+      const result = await service.processFile(csvFile);
+
+      // Assert
+      expect(result.expenses.length).toBe(6);
+      expect(result.errors.length).toBe(0);
+      expect(result.metadata.bankFormat).toBe('traderepublic');
+      expect(result.metadata.totalRows).toBe(6);
+      expect(result.metadata.validRows).toBe(6);
+      expect(result.metadata.invalidRows).toBe(0);
+    });
+
+    it('should parse Trade Republic expense data correctly', async () => {
+      // Arrange
+      const csvFile = new File([tradeRepublicCSVData], 'traderepublic.csv', { type: 'text/csv' });
+
+      Object.defineProperty(csvFile, 'text', {
+        value: vi.fn().mockResolvedValue(tradeRepublicCSVData)
+      });
+
+      mockPapaParse.parse.mockImplementation((text, config) => {
+        const lines = text.split('\n');
+        const headers = lines[0].split(';');
+        const data = lines.slice(1).map((line: string) => {
+          const values = line.split(';');
+          const row: any = {};
+          headers.forEach((header: string, index: number) => {
+            row[header] = values[index];
+          });
+          return row;
+        });
+        
+        config.complete({
+          data,
+          errors: []
+        });
+      });
+
+      // Act
+      const result = await service.processFile(csvFile);
+
+      // Assert
+      const firstExpense = result.expenses[0];
+      expect(firstExpense.date).toBe('2025-09-06');
+      expect(firstExpense.description).toBe('ANDITEC- NAVARRALANPARTY');
+      expect(firstExpense.amount).toBe(-1.50);
+      expect(firstExpense.category).toBe('Uncategorized');
+      expect(firstExpense.currency).toBe('EUR');
+      expect(firstExpense.account).toBe('Trade Republic');
+
+      const bizumExpense = result.expenses[3];
+      expect(bizumExpense.description).toBe('Lupe - Bizum');
+      expect(bizumExpense.category).toBe('Transfer');
+      expect(bizumExpense.tags).toContain('bizum');
+
+      const interestExpense = result.expenses[5];
+      expect(interestExpense.description).toBe('Interest - 2 % p.a.');
+      expect(interestExpense.amount).toBe(54.86);
+      expect(interestExpense.category).toBe('Interest Income');
+      expect(interestExpense.tags).toContain('interest');
+    });
+
+    it('should handle Trade Republic date parsing correctly', () => {
+      // Act & Assert - Test the private method directly
+      expect(service['parseTradeRepublicDate']('2025-09-06T11:19:00.528Z')).toEqual(new Date('2025-09-06T11:19:00.528Z'));
+      expect(service['parseTradeRepublicDate']('2025-09-01T11:19:18.033Z')).toEqual(new Date('2025-09-01T11:19:18.033Z'));
+      expect(service['parseTradeRepublicDate']('invalid')).toBe(null);
+      expect(service['parseTradeRepublicDate']('')).toBe(null);
+    });
+
+    it('should handle Trade Republic amount parsing correctly', () => {
+      // Act & Assert - Test the private method directly
+      expect(service['parseTradeRepublicAmount']('-1.50')).toBe(-1.50);
+      expect(service['parseTradeRepublicAmount']('54.86')).toBe(54.86);
+      expect(service['parseTradeRepublicAmount']('0.00')).toBe(0.00);
+      expect(service['parseTradeRepublicAmount']('invalid')).toBe(null);
+      expect(service['parseTradeRepublicAmount']('')).toBe(null);
+    });
+
+    it('should map Trade Republic categories correctly', () => {
+      // Act & Assert - Test the private method directly
+      expect(service['mapTradeRepublicCategory']('McDonald\'s', '')).toBe('Food & Dining');
+      expect(service['mapTradeRepublicCategory']('Gasolinera ARALAR', '')).toBe('Transportation');
+      expect(service['mapTradeRepublicCategory']('Mercadona', '')).toBe('Groceries');
+      expect(service['mapTradeRepublicCategory']('Interest', '2 % p.a.')).toBe('Interest Income');
+      expect(service['mapTradeRepublicCategory']('Lupe', 'Bizum')).toBe('Transfer');
+      expect(service['mapTradeRepublicCategory']('YouTube', '')).toBe('Entertainment');
+      expect(service['mapTradeRepublicCategory']('Synergym', '')).toBe('Health & Fitness');
+      expect(service['mapTradeRepublicCategory']('Unknown Store', '')).toBe('Uncategorized');
+    });
+
+    it('should extract Trade Republic tags correctly', () => {
+      // Act & Assert - Test the private method directly
+      expect(service['extractTradeRepublicTags']('Lupe', 'Bizum')).toContain('bizum');
+      expect(service['extractTradeRepublicTags']('Interest', '2 % p.a.')).toContain('interest');
+      expect(service['extractTradeRepublicTags']('McDonald\'s', '')).toContain('food');
+      expect(service['extractTradeRepublicTags']('Gasolinera ARALAR', '')).toContain('fuel');
+      expect(service['extractTradeRepublicTags']('Mercadona', '')).toContain('groceries');
+      expect(service['extractTradeRepublicTags']('Unknown Store', '')).toBe(undefined);
+    });
+  });
+
   describe('Generic CSV Processing', () => {
     const genericCSVData = `date,description,amount,category,currency
 2024-01-15,Coffee,4.50,Food,USD

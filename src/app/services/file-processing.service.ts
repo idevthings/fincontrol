@@ -49,6 +49,12 @@ export class FileProcessingService {
         expenses = result.expenses;
         errors = result.errors;
         console.log('[FileProcessingService] Ibercaja parsing complete. Expenses:', expenses.length, 'Errors:', errors.length);
+      } else if (bankFormat === 'traderepublic') {
+        console.log('[FileProcessingService] Using PapaParse for Trade Republic CSV');
+        const result = await this.parseTradeRepublicCSVWithPapa(text);
+        expenses = result.expenses;
+        errors = result.errors;
+        console.log('[FileProcessingService] Trade Republic parsing complete. Expenses:', expenses.length, 'Errors:', errors.length);
       } else {
         console.log('[FileProcessingService] Using PapaParse for generic CSV');
         const result = await this.parseGenericCSVWithPapa(text);
@@ -134,6 +140,16 @@ export class FileProcessingService {
   private detectBankFormat(csvText: string): string {
     const lines = csvText.split('\n');
 
+    // Check for Trade Republic format
+    if (lines.length > 0) {
+      const firstLine = lines[0].trim();
+      if (firstLine.includes('timestamp') && firstLine.includes('formatted_timestamp') && 
+          firstLine.includes('title') && firstLine.includes('subtitle') && 
+          firstLine.includes('value') && firstLine.includes('currency')) {
+        return 'traderepublic';
+      }
+    }
+
     // Check for Ibercaja format
     if (lines.length > 2) {
       // Look for Ibercaja-specific patterns
@@ -208,6 +224,62 @@ export class FileProcessingService {
           } catch (error) {
             const errorMsg = `CSV parsing error: ${error instanceof Error ? error.message : 'Unknown error'}`;
             console.error('[FileProcessingService] Exception in parseIbercajaCSVWithPapa:', error);
+            errors.push(errorMsg);
+            resolve({ expenses, errors });
+          }
+        },
+        error: (error: any) => {
+          console.error('[FileProcessingService] PapaParse error:', error);
+          errors.push(`PapaParse error: ${error.message}`);
+          resolve({ expenses, errors });
+        }
+      });
+    });
+  }
+
+  private async parseTradeRepublicCSVWithPapa(csvText: string): Promise<{ expenses: Expense[]; errors: string[] }> {
+    console.log('[FileProcessingService] Starting Trade Republic CSV parsing with PapaParse');
+    const expenses: Expense[] = [];
+    const errors: string[] = [];
+
+    return new Promise((resolve, reject) => {
+      Papa.parse(csvText, {
+        delimiter: ';', // Trade Republic uses semicolons
+        header: true, // Trade Republic has headers
+        skipEmptyLines: true,
+        quoteChar: '"',
+        escapeChar: '"',
+        complete: (results) => {
+          try {
+            console.log('[FileProcessingService] PapaParse completed. Total rows:', results.data.length);
+
+            if (results.errors && results.errors.length > 0) {
+              console.warn('[FileProcessingService] PapaParse warnings:', results.errors);
+            }
+
+            // Process data rows
+            for (let i = 0; i < results.data.length; i++) {
+              const row = results.data[i] as any;
+              if (!row || Object.keys(row).length === 0) {
+                continue; // Skip empty rows
+              }
+
+              try {
+                const expense = this.parseTradeRepublicRow(row);
+                if (expense) {
+                  expenses.push(expense);
+                }
+              } catch (error) {
+                const errorMsg = `Row ${i + 1}: ${error instanceof Error ? error.message : 'Invalid data'}`;
+                errors.push(errorMsg);
+              }
+            }
+
+            console.log('[FileProcessingService] Trade Republic parsing summary - Total rows processed:', results.data.length, 'Valid expenses:', expenses.length, 'Errors:', errors.length);
+            resolve({ expenses, errors });
+          } catch (error) {
+            const errorMsg = `CSV parsing error: ${error instanceof Error ? error.message : 'Unknown error'}`;
+            console.error('[FileProcessingService] Exception in parseTradeRepublicCSVWithPapa:', error);
             errors.push(errorMsg);
             resolve({ expenses, errors });
           }
@@ -345,6 +417,129 @@ export class FileProcessingService {
     }
     if (referencia.match(/\d{8,}/)) {
       tags.push('reference');
+    }
+
+    return tags.length > 0 ? tags : undefined;
+  }
+
+  private parseTradeRepublicRow(row: any): Expense | null {
+    if (!row.timestamp || !row.title || !row.value) {
+      throw new Error('Missing required fields: timestamp, title, or value');
+    }
+
+    // Parse date from ISO 8601 format
+    const date = this.parseTradeRepublicDate(row.timestamp);
+    if (!date) {
+      throw new Error('Invalid timestamp format');
+    }
+
+    // Parse amount
+    const amount = this.parseTradeRepublicAmount(row.value);
+    if (amount === null) {
+      throw new Error('Invalid amount format');
+    }
+
+    // Build description from title and subtitle
+    let description = this.sanitizeText(row.title) || '';
+    if (row.subtitle && row.subtitle.trim()) {
+      const subtitle = this.sanitizeText(row.subtitle) || '';
+      description += ` - ${subtitle}`;
+    }
+
+    return {
+      date: date.toISOString().split('T')[0],
+      description,
+      amount,
+      category: this.mapTradeRepublicCategory(row.title, row.subtitle),
+      currency: this.sanitizeText(row.currency) || 'EUR',
+      account: 'Trade Republic',
+      tags: this.extractTradeRepublicTags(row.title, row.subtitle)
+    };
+  }
+
+  private parseTradeRepublicDate(timestampStr: string): Date | null {
+    if (!timestampStr) return null;
+
+    try {
+      // Trade Republic uses ISO 8601 format: 2025-09-06T11:19:00.528Z
+      const date = new Date(timestampStr);
+      return isNaN(date.getTime()) ? null : date;
+    } catch {
+      return null;
+    }
+  }
+
+  private parseTradeRepublicAmount(amountStr: string): number | null {
+    if (!amountStr) return null;
+
+    try {
+      // Trade Republic uses standard decimal format: -1.50, 50.00
+      const amount = parseFloat(amountStr);
+      return isNaN(amount) ? null : amount;
+    } catch {
+      return null;
+    }
+  }
+
+  private mapTradeRepublicCategory(title: string, subtitle: string): string {
+    const titleLower = title.toLowerCase();
+    const subtitleLower = subtitle ? subtitle.toLowerCase() : '';
+
+    // Map common Trade Republic categories
+    if (titleLower.includes('mcdonald') || titleLower.includes('burger') || titleLower.includes('restaurant')) {
+      return 'Food & Dining';
+    }
+    if (titleLower.includes('gasolinera') || titleLower.includes('fuel') || titleLower.includes('gas')) {
+      return 'Transportation';
+    }
+    if (titleLower.includes('mercadona') || titleLower.includes('supermarket') || titleLower.includes('grocery')) {
+      return 'Groceries';
+    }
+    if (titleLower.includes('interest') || subtitleLower.includes('interest')) {
+      return 'Interest Income';
+    }
+    if (subtitleLower.includes('bizum')) {
+      return 'Transfer';
+    }
+    if (subtitleLower.includes('saving') || subtitleLower.includes('round up')) {
+      return 'Savings';
+    }
+    if (titleLower.includes('youtube') || titleLower.includes('netflix') || titleLower.includes('subscription')) {
+      return 'Entertainment';
+    }
+    if (titleLower.includes('parking') || titleLower.includes('telpark')) {
+      return 'Transportation';
+    }
+    if (titleLower.includes('gym') || titleLower.includes('synergym')) {
+      return 'Health & Fitness';
+    }
+
+    return 'Uncategorized';
+  }
+
+  private extractTradeRepublicTags(title: string, subtitle: string): string[] | undefined {
+    const tags: string[] = [];
+    const titleLower = title.toLowerCase();
+    const subtitleLower = subtitle ? subtitle.toLowerCase() : '';
+
+    // Extract tags based on content
+    if (subtitleLower.includes('bizum')) {
+      tags.push('bizum');
+    }
+    if (subtitleLower.includes('saving') || subtitleLower.includes('round up')) {
+      tags.push('savings');
+    }
+    if (titleLower.includes('interest')) {
+      tags.push('interest');
+    }
+    if (titleLower.includes('mcdonald') || titleLower.includes('burger') || titleLower.includes('restaurant')) {
+      tags.push('food');
+    }
+    if (titleLower.includes('gasolinera') || titleLower.includes('fuel')) {
+      tags.push('fuel');
+    }
+    if (titleLower.includes('mercadona') || titleLower.includes('supermarket')) {
+      tags.push('groceries');
     }
 
     return tags.length > 0 ? tags : undefined;
