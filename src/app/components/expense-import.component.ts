@@ -45,7 +45,26 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
       }
 
       @if (!selectedFile) {
-        <app-file-upload (fileSelected)="onFileSelected($event)"></app-file-upload>
+        <div class="import-options">
+          <app-file-upload (fileSelected)="onFileSelected($event)"></app-file-upload>
+          
+          <mat-card class="bank-integration-card disabled">
+            <mat-card-content>
+              <div class="bank-integration-content">
+                <div class="bank-icon">
+                  <mat-icon>account_balance</mat-icon>
+                </div>
+                <h3>Open Bank Integration</h3>
+                <p>Connect directly to your bank via Open Banking API for real-time expense tracking</p>
+                <button mat-raised-button color="primary" disabled class="integration-button">
+                  <mat-icon>link</mat-icon>
+                  Connect Bank Account
+                </button>
+                <small class="coming-soon">Coming Soon</small>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
       } @else {
         <mat-card class="file-preview">
           <mat-card-content>
@@ -224,6 +243,94 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
       max-width: 800px;
       margin: 0 auto;
       padding: 1rem;
+    }
+
+    .import-options {
+      display: flex;
+      flex-direction: row;
+      gap: 2rem;
+      align-items: stretch;
+      height: 400px;
+    }
+
+    .import-options > * {
+      flex: 1 1 50%;
+      width: 50%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media (max-width: 768px) {
+      .import-options {
+        flex-direction: column;
+        height: auto;
+      }
+      
+      .import-options > * {
+        flex: none;
+        width: 100%;
+        height: auto;
+      }
+    }
+
+    .bank-integration-card {
+      opacity: 0.6;
+      cursor: not-allowed;
+      border: 2px dashed #cbd5e1 !important;
+      background-color: #f8fafc;
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bank-integration-card.disabled {
+      background-color: #f1f5f9;
+    }
+
+    .bank-integration-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      text-align: center;
+      padding: 2rem !important;
+      height: 100%;
+      justify-content: center;
+    }
+
+    .bank-icon {
+      font-size: 3rem;
+      color: #6b7280;
+    }
+
+    .bank-icon mat-icon {
+      font-size: 3rem;
+      width: 3rem;
+      height: 3rem;
+    }
+
+    .bank-integration-content h3 {
+      margin: 0;
+      color: #6b7280;
+    }
+
+    .bank-integration-content p {
+      margin: 0;
+      color: #9ca3af;
+      max-width: 400px;
+    }
+
+    .integration-button {
+      margin-top: 0.5rem;
+    }
+
+    .coming-soon {
+      color: #9ca3af;
+      font-size: 0.875rem;
+      font-style: italic;
     }
 
     .config-error {

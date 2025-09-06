@@ -44,8 +44,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   `,
   styles: [`
     .file-upload-container {
-      max-width: 500px;
-      margin: 2rem auto;
+      margin: 0;
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     .upload-card {
@@ -53,6 +57,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
       transition: all 0.3s ease;
       border: 2px dashed #cbd5e1 !important;
       background-color: #f8fafc;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     .upload-card:hover {
@@ -72,6 +79,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
       gap: 1rem;
       text-align: center;
       padding: 2rem !important;
+      height: 100%;
+      justify-content: center;
     }
 
     .upload-icon {
