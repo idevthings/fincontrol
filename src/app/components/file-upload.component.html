@@ -1,0 +1,31 @@
+<div class="file-upload-container">
+  <mat-card 
+    class="upload-card"
+    [class.drag-over]="isDragOver"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+    (click)="fileInput.click()"
+  >
+    <mat-card-content class="upload-content">
+      <div class="upload-icon">
+        <mat-icon>cloud_upload</mat-icon>
+      </div>
+      <h3>Import Your Expenses</h3>
+      <p>Drag and drop your CSV or JSON file here, or click to browse</p>
+      <button mat-raised-button color="primary" type="button" class="upload-button">
+        <mat-icon>folder_open</mat-icon>
+        Choose File
+      </button>
+      <small class="file-types">Supports: .csv, .json</small>
+    </mat-card-content>
+  </mat-card>
+
+  <input
+    #fileInput
+    type="file"
+    class="hidden"
+    accept=".csv,.json"
+    (change)="onFileSelected($event)"
+  />
+</div>

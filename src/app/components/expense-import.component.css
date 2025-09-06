@@ -1,0 +1,254 @@
+.expense-import {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.import-options {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  align-items: stretch;
+  height: 400px;
+}
+
+.import-options > * {
+  flex: 1 1 50%;
+  width: 50%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .import-options {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .import-options > * {
+    flex: none;
+    width: 100%;
+    height: auto;
+  }
+}
+
+.bank-integration-card {
+  opacity: 0.6;
+  cursor: not-allowed;
+  border: 2px dashed #cbd5e1 !important;
+  background-color: #f8fafc;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.bank-integration-card.disabled {
+  background-color: #f1f5f9;
+}
+
+.bank-integration-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 2rem !important;
+  height: 100%;
+  justify-content: center;
+}
+
+.bank-icon {
+  font-size: 3rem;
+  color: #6b7280;
+}
+
+.bank-icon mat-icon {
+  font-size: 3rem;
+  width: 3rem;
+  height: 3rem;
+}
+
+.bank-integration-content h3 {
+  margin: 0;
+  color: #6b7280;
+}
+
+.bank-integration-content p {
+  margin: 0;
+  color: #9ca3af;
+  max-width: 400px;
+}
+
+.integration-button {
+  margin-top: 0.5rem;
+}
+
+.coming-soon {
+  color: #9ca3af;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+.config-error {
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  margin-bottom: 2rem;
+}
+
+.error-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.error-icon mat-icon {
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+}
+
+.config-error h3 {
+  color: #92400e;
+  margin: 0 0 0.5rem 0;
+}
+
+.config-error p {
+  color: #78350f;
+  margin: 0.5rem 0;
+}
+
+.config-error code {
+  background: #fed7aa;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #1f2937;
+}
+
+.file-preview {
+  margin-bottom: 2rem;
+}
+
+.file-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: #1f2937;
+}
+
+.file-info p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.action-buttons button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.results {
+  margin-bottom: 2rem;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat {
+  min-height: 80px;
+}
+
+.stat-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-content mat-icon {
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+}
+
+.stat-label {
+  font-weight: 500;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.stat-value {
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.stat.success {
+  border-left: 4px solid #10b981;
+}
+
+.stat.error {
+  border-left: 4px solid #ef4444;
+}
+
+.errors {
+  margin-bottom: 1.5rem;
+}
+
+.errors ul {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 0;
+}
+
+.errors li {
+  color: #dc2626;
+  margin-bottom: 0.25rem;
+}
+
+.import-status {
+  margin-bottom: 1.5rem;
+}
+
+.success {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #10b981;
+  font-weight: 500;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.preview {
+  margin-bottom: 2rem;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.preview-table {
+  width: 100%;
+}
