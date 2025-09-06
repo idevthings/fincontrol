@@ -1,30 +1,37 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-file-upload',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatButtonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule],
   template: `
     <div class="file-upload-container">
-      <div
-        class="upload-area"
+      <mat-card 
+        class="upload-card"
         [class.drag-over]="isDragOver"
         (dragover)="onDragOver($event)"
         (dragleave)="onDragLeave($event)"
         (drop)="onDrop($event)"
         (click)="fileInput.click()"
       >
-        <div class="upload-content">
-          <div class="upload-icon">📁</div>
+        <mat-card-content class="upload-content">
+          <div class="upload-icon">
+            <mat-icon>cloud_upload</mat-icon>
+          </div>
           <h3>Import Your Expenses</h3>
           <p>Drag and drop your CSV or JSON file here, or click to browse</p>
-          <button type="button" class="upload-button">
+          <button mat-raised-button color="primary" type="button" class="upload-button">
+            <mat-icon>folder_open</mat-icon>
             Choose File
           </button>
           <small class="file-types">Supports: .csv, .json</small>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
 
       <input
         #fileInput
@@ -41,23 +48,20 @@ import { CommonModule } from '@angular/common';
       margin: 2rem auto;
     }
 
-    .upload-area {
-      border: 2px dashed #cbd5e1;
-      border-radius: 8px;
-      padding: 2rem;
-      text-align: center;
+    .upload-card {
       cursor: pointer;
       transition: all 0.3s ease;
+      border: 2px dashed #cbd5e1 !important;
       background-color: #f8fafc;
     }
 
-    .upload-area:hover {
-      border-color: #3b82f6;
+    .upload-card:hover {
+      border-color: #3b82f6 !important;
       background-color: #eff6ff;
     }
 
-    .upload-area.drag-over {
-      border-color: #10b981;
+    .upload-card.drag-over {
+      border-color: #10b981 !important;
       background-color: #ecfdf5;
     }
 
@@ -66,10 +70,19 @@ import { CommonModule } from '@angular/common';
       flex-direction: column;
       align-items: center;
       gap: 1rem;
+      text-align: center;
+      padding: 2rem !important;
     }
 
     .upload-icon {
       font-size: 3rem;
+      color: #6b7280;
+    }
+
+    .upload-icon mat-icon {
+      font-size: 3rem;
+      width: 3rem;
+      height: 3rem;
     }
 
     h3 {
@@ -83,18 +96,7 @@ import { CommonModule } from '@angular/common';
     }
 
     .upload-button {
-      background-color: #3b82f6;
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: background-color 0.2s;
-    }
-
-    .upload-button:hover {
-      background-color: #2563eb;
+      margin-top: 0.5rem;
     }
 
     .file-types {

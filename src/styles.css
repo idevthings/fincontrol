@@ -1,1 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Angular Material theme */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+/* Global styles for better Material Design integration */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+}

@@ -5,139 +5,217 @@ import { FileProcessingService } from '../services/file-processing.service';
 import { ExpenseService } from '../services/expense.service';
 import { ErrorHandlingService } from '../services/error-handling.service';
 import { FileProcessingResult, ExpenseImportResult } from '../models/expense.model';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTableModule } from '@angular/material/table';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-expense-import',
   standalone: true,
-  imports: [CommonModule, FileUploadComponent],
+  imports: [
+    CommonModule, 
+    FileUploadComponent,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatTableModule,
+    MatChipsModule,
+    MatSnackBarModule
+  ],
   template: `
     <div class="expense-import">
       <h2>Import Expenses</h2>
 
       @if (hasConfigurationError) {
-        <div class="config-error">
-          <div class="error-icon">⚠️</div>
-          <h3>Configuration Required</h3>
-          <p>{{ configurationError }}</p>
-          <p>Please update your <code>src/environments/environment.ts</code> file with your Supabase credentials.</p>
-        </div>
+        <mat-card class="config-error">
+          <mat-card-content>
+            <div class="error-icon">
+              <mat-icon color="warn">warning</mat-icon>
+            </div>
+            <h3>Configuration Required</h3>
+            <p>{{ configurationError }}</p>
+            <p>Please update your <code>src/environments/environment.ts</code> file with your Supabase credentials.</p>
+          </mat-card-content>
+        </mat-card>
       }
 
       @if (!selectedFile) {
         <app-file-upload (fileSelected)="onFileSelected($event)"></app-file-upload>
       } @else {
-        <div class="file-preview">
-          <div class="file-info">
-            <h3>Selected File: {{ selectedFile.name }}</h3>
-            <p>Size: {{ formatFileSize(selectedFile.size) }}</p>
-            @if (processingResult && processingResult.metadata && processingResult.metadata.bankFormat && processingResult.metadata.bankFormat !== 'generic') {
-              <p class="bank-format">Detected: <strong>{{ processingResult.metadata.bankFormat | titlecase }} Bank Format</strong></p>
-            }
-          </div>
-
-          <div class="action-buttons">
-            <button
-              type="button"
-              class="btn btn-primary"
-              (click)="processFile()"
-              [disabled]="isProcessing || isImporting || hasConfigurationError"
-            >
-              @if (isProcessing) {
-                <span class="spinner"></span>
-                Processing File...
-              } @else if (isImporting) {
-                <span class="spinner"></span>
-                Importing Data...
-              } @else {
-                Import Expenses
+        <mat-card class="file-preview">
+          <mat-card-content>
+            <div class="file-info">
+              <h3>Selected File: {{ selectedFile.name }}</h3>
+              <p>Size: {{ formatFileSize(selectedFile.size) }}</p>
+              @if (processingResult && processingResult.metadata && processingResult.metadata.bankFormat && processingResult.metadata.bankFormat !== 'generic') {
+                <mat-chip color="primary" selected>
+                  <mat-icon>account_balance</mat-icon>
+                  {{ processingResult.metadata.bankFormat | titlecase }} Bank Format
+                </mat-chip>
               }
-            </button>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              (click)="clearFile()"
-              [disabled]="isProcessing"
-            >
-              Choose Different File
-            </button>
-          </div>
-        </div>
+            </div>
+
+            <div class="action-buttons">
+              <button
+                mat-raised-button
+                color="primary"
+                type="button"
+                (click)="processFile()"
+                [disabled]="isProcessing || isImporting || hasConfigurationError"
+              >
+                @if (isProcessing) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                  Processing File...
+                } @else if (isImporting) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                  Importing Data...
+                } @else {
+                  <mat-icon>upload</mat-icon>
+                  Import Expenses
+                }
+              </button>
+              <button
+                mat-stroked-button
+                type="button"
+                (click)="clearFile()"
+                [disabled]="isProcessing"
+              >
+                <mat-icon>folder_open</mat-icon>
+                Choose Different File
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
       }
 
       @if (processingResult) {
-        <div class="results">
-          <h3>Processing Results</h3>
-          <div class="stats">
-            <div class="stat">
-              <span class="stat-label">Total Rows:</span>
-              <span class="stat-value">{{ processingResult.metadata.totalRows }}</span>
+        <mat-card class="results">
+          <mat-card-header>
+            <mat-card-title>Processing Results</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="stats">
+              <mat-card class="stat">
+                <mat-card-content>
+                  <div class="stat-content">
+                    <mat-icon>table_rows</mat-icon>
+                    <div>
+                      <div class="stat-label">Total Rows</div>
+                      <div class="stat-value">{{ processingResult.metadata.totalRows }}</div>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+              <mat-card class="stat success">
+                <mat-card-content>
+                  <div class="stat-content">
+                    <mat-icon color="primary">check_circle</mat-icon>
+                    <div>
+                      <div class="stat-label">Valid Expenses</div>
+                      <div class="stat-value">{{ processingResult.metadata.validRows }}</div>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+              <mat-card class="stat error">
+                <mat-card-content>
+                  <div class="stat-content">
+                    <mat-icon color="warn">error</mat-icon>
+                    <div>
+                      <div class="stat-label">Errors</div>
+                      <div class="stat-value">{{ processingResult.metadata.invalidRows }}</div>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
             </div>
-            <div class="stat">
-              <span class="stat-label">Valid Expenses:</span>
-              <span class="stat-value success">{{ processingResult.metadata.validRows }}</span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">Errors:</span>
-              <span class="stat-value error">{{ processingResult.metadata.invalidRows }}</span>
-            </div>
-          </div>
 
-          @if (processingResult.errors.length > 0) {
-            <div class="errors">
-              <h4>Errors Found:</h4>
-              <ul>
-                @for (error of processingResult.errors; track $index) {
-                  <li>{{ error }}</li>
-                }
-              </ul>
-            </div>
-          }
-
-          @if (importResult) {
-            <div class="import-status">
-              <h4>Import Status:</h4>
-              @if (importResult.success) {
-                <p class="success">
-                  ✅ Successfully imported {{ importResult.totalImported }} of {{ importResult.totalProcessed }} expenses
-                </p>
-              } @else {
-                <p class="error">
-                  ❌ Import failed: {{ importResult.errors?.join(', ') }}
-                </p>
-              }
-            </div>
-          }
-
-          @if (processingResult.expenses.length > 0 && !importResult) {
-            <div class="preview">
-              <h4>Data Preview (first 5 rows):</h4>
-              <div class="table-container">
-                <table class="preview-table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Description</th>
-                      <th>Amount</th>
-                      <th>Category</th>
-                      <th>Currency</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (expense of processingResult.expenses.slice(0, 5); track expense.description) {
-                      <tr>
-                        <td>{{ expense.date }}</td>
-                        <td>{{ expense.description }}</td>
-                        <td>{{ expense.amount | number:'1.2-2' }}</td>
-                        <td>{{ expense.category }}</td>
-                        <td>{{ expense.currency }}</td>
-                      </tr>
+            @if (processingResult.errors.length > 0) {
+              <mat-card class="errors">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon color="warn">error</mat-icon>
+                    Errors Found
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <ul>
+                    @for (error of processingResult.errors; track $index) {
+                      <li>{{ error }}</li>
                     }
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          }
-        </div>
+                  </ul>
+                </mat-card-content>
+              </mat-card>
+            }
+
+            @if (importResult) {
+              <mat-card class="import-status">
+                <mat-card-header>
+                  <mat-card-title>Import Status</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  @if (importResult.success) {
+                    <div class="success">
+                      <mat-icon color="primary">check_circle</mat-icon>
+                      Successfully imported {{ importResult.totalImported }} of {{ importResult.totalProcessed }} expenses
+                    </div>
+                  } @else {
+                    <div class="error">
+                      <mat-icon color="warn">error</mat-icon>
+                      Import failed: {{ importResult.errors?.join(', ') }}
+                    </div>
+                  }
+                </mat-card-content>
+              </mat-card>
+            }
+
+            @if (processingResult.expenses.length > 0 && !importResult) {
+              <mat-card class="preview">
+                <mat-card-header>
+                  <mat-card-title>Data Preview (first 5 rows)</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="table-container">
+                    <table mat-table [dataSource]="processingResult.expenses.slice(0, 5)" class="preview-table">
+                      <ng-container matColumnDef="date">
+                        <th mat-header-cell *matHeaderCellDef>Date</th>
+                        <td mat-cell *matCellDef="let expense">{{ expense.date }}</td>
+                      </ng-container>
+                      
+                      <ng-container matColumnDef="description">
+                        <th mat-header-cell *matHeaderCellDef>Description</th>
+                        <td mat-cell *matCellDef="let expense">{{ expense.description }}</td>
+                      </ng-container>
+                      
+                      <ng-container matColumnDef="amount">
+                        <th mat-header-cell *matHeaderCellDef>Amount</th>
+                        <td mat-cell *matCellDef="let expense">{{ expense.amount | number:'1.2-2' }}</td>
+                      </ng-container>
+                      
+                      <ng-container matColumnDef="category">
+                        <th mat-header-cell *matHeaderCellDef>Category</th>
+                        <td mat-cell *matCellDef="let expense">{{ expense.category }}</td>
+                      </ng-container>
+                      
+                      <ng-container matColumnDef="currency">
+                        <th mat-header-cell *matHeaderCellDef>Currency</th>
+                        <td mat-cell *matCellDef="let expense">{{ expense.currency }}</td>
+                      </ng-container>
+                      
+                      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                    </table>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+          </mat-card-content>
+        </mat-card>
       }
     </div>
   `,
@@ -145,21 +223,24 @@ import { FileProcessingResult, ExpenseImportResult } from '../models/expense.mod
     .expense-import {
       max-width: 800px;
       margin: 0 auto;
-      padding: 2rem;
+      padding: 1rem;
     }
 
     .config-error {
       background: #fef3c7;
       border: 1px solid #f59e0b;
-      border-radius: 8px;
-      padding: 1.5rem;
-      text-align: center;
       margin-bottom: 2rem;
     }
 
     .error-icon {
       font-size: 2rem;
       margin-bottom: 1rem;
+    }
+
+    .error-icon mat-icon {
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
     }
 
     .config-error h3 {
@@ -186,10 +267,6 @@ import { FileProcessingResult, ExpenseImportResult } from '../models/expense.mod
     }
 
     .file-preview {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 1.5rem;
       margin-bottom: 2rem;
     }
 
@@ -203,114 +280,66 @@ import { FileProcessingResult, ExpenseImportResult } from '../models/expense.mod
       color: #6b7280;
     }
 
-    .bank-format {
-      color: #059669;
-      font-weight: 500;
-    }
-
     .action-buttons {
       display: flex;
       gap: 1rem;
       margin-top: 1rem;
     }
 
-    .btn {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: all 0.2s;
+    .action-buttons button {
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
 
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .btn-primary {
-      background-color: #10b981;
-      color: white;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background-color: #059669;
-    }
-
-    .btn-secondary {
-      background-color: #6b7280;
-      color: white;
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-      background-color: #4b5563;
-    }
-
-    .spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid #ffffff;
-      border-top: 2px solid transparent;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
     .results {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
 
     .stat {
+      min-height: 80px;
+    }
+
+    .stat-content {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 0.75rem;
-      background: white;
-      border-radius: 6px;
-      border: 1px solid #e2e8f0;
+      gap: 1rem;
+    }
+
+    .stat-content mat-icon {
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
     }
 
     .stat-label {
       font-weight: 500;
       color: #6b7280;
+      font-size: 0.875rem;
     }
 
     .stat-value {
       font-weight: 600;
+      font-size: 1.25rem;
     }
 
-    .stat-value.success {
-      color: #10b981;
+    .stat.success {
+      border-left: 4px solid #10b981;
     }
 
-    .stat-value.error {
-      color: #ef4444;
+    .stat.error {
+      border-left: 4px solid #ef4444;
     }
 
     .errors {
       margin-bottom: 1.5rem;
-    }
-
-    .errors h4 {
-      color: #ef4444;
-      margin-bottom: 0.5rem;
     }
 
     .errors ul {
@@ -330,22 +359,24 @@ import { FileProcessingResult, ExpenseImportResult } from '../models/expense.mod
       margin-bottom: 1.5rem;
     }
 
-    .import-status h4 {
-      margin-bottom: 0.5rem;
-    }
-
     .success {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
       color: #10b981;
       font-weight: 500;
     }
 
     .error {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
       color: #ef4444;
       font-weight: 500;
     }
 
-    .preview h4 {
-      margin-bottom: 1rem;
+    .preview {
+      margin-bottom: 2rem;
     }
 
     .table-container {
@@ -354,28 +385,6 @@ import { FileProcessingResult, ExpenseImportResult } from '../models/expense.mod
 
     .preview-table {
       width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 6px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .preview-table th,
-    .preview-table td {
-      padding: 0.75rem;
-      text-align: left;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    .preview-table th {
-      background: #f1f5f9;
-      font-weight: 600;
-      color: #374151;
-    }
-
-    .preview-table tbody tr:hover {
-      background: #f8fafc;
     }
   `]
 })
@@ -387,6 +396,7 @@ export class ExpenseImportComponent {
   importResult: ExpenseImportResult | null = null;
   hasConfigurationError = false;
   configurationError = '';
+  displayedColumns: string[] = ['date', 'description', 'amount', 'category', 'currency'];
 
   private fileProcessingService = inject(FileProcessingService);
   private expenseService = inject(ExpenseService);

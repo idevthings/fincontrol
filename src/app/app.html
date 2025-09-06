@@ -1,11 +1,19 @@
 <div class="app-container">
-  <header class="app-header">
-    <h1>{{ title() }}</h1>
-    <p>Finance Expense Tracking App</p>
-  </header>
+  <mat-toolbar color="primary" class="app-header">
+    <div class="header-content">
+      <h1 class="app-title">
+        <span class="fin">fin</span><span class="control">CONTROL</span>
+      </h1>
+      <p class="app-subtitle">Finance Expense Tracking App</p>
+    </div>
+  </mat-toolbar>
 
   <main class="app-main">
-    <app-expense-import></app-expense-import>
+    <mat-card class="main-card">
+      <mat-card-content>
+        <app-expense-import></app-expense-import>
+      </mat-card-content>
+    </mat-card>
   </main>
 </div>
 
