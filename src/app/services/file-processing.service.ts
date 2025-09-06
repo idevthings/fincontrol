@@ -155,7 +155,7 @@ export class FileProcessingService {
 
     return new Promise((resolve, reject) => {
       Papa.parse(csvText, {
-        delimiter: ';', // Ibercaja uses semicolons
+        delimiter: ',', // Ibercaja CSV uses commas
         header: false, // We'll handle headers manually
         skipEmptyLines: true,
         quoteChar: '"',

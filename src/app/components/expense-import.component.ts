@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FileUploadComponent } from './file-upload.component';
 import { FileProcessingService } from '../services/file-processing.service';
@@ -391,6 +391,7 @@ export class ExpenseImportComponent {
   private fileProcessingService = inject(FileProcessingService);
   private expenseService = inject(ExpenseService);
   private errorService = inject(ErrorHandlingService);
+  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     this.checkConfiguration();
@@ -452,8 +453,8 @@ export class ExpenseImportComponent {
         }
       };
     } finally {
-      console.log('[ExpenseImport] processFile completed, setting isProcessing to false');
       this.isProcessing = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -480,8 +481,8 @@ export class ExpenseImportComponent {
         totalImported: 0
       };
     } finally {
-      console.log('[ExpenseImport] importProcessedData completed, setting isImporting to false');
       this.isImporting = false;
+      this.cdr.detectChanges();
     }
   }
 

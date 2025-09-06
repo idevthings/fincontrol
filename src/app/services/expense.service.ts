@@ -16,8 +16,7 @@ export class ExpenseService {
       console.log('[ExpenseService] Calling Supabase insert...');
       const { data, error } = await this.supabaseConfig.client
         .from('expenses')
-        .insert(expenses)
-        .select();
+        .insert(expenses);
 
       if (error) {
         console.error('[ExpenseService] Supabase error:', error);
@@ -29,12 +28,12 @@ export class ExpenseService {
         };
       }
 
-      console.log('[ExpenseService] Supabase insert successful. Data length:', data?.length);
+      console.log('[ExpenseService] Supabase insert successful. Inserted', expenses.length, 'expenses');
       return {
         success: true,
-        data: data || [],
+        data: expenses, // Return the original data since we don't get it back from insert
         totalProcessed: expenses.length,
-        totalImported: data?.length || 0
+        totalImported: expenses.length
       };
     } catch (error) {
       console.error('[ExpenseService] Exception in importExpenses:', error);
