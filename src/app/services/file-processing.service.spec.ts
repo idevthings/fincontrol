@@ -284,13 +284,13 @@ Nº Orden,Fecha Oper,Fecha Valor,Concepto,Descripción,Referencia,Importe,Saldo
 
       const bizumExpense = result.expenses[3];
       expect(bizumExpense.description).toBe('Lupe - Bizum');
-      expect(bizumExpense.category).toBe('Transfer');
+      expect(bizumExpense.category).toBe('Uncategorized');
       expect(bizumExpense.tags).toContain('bizum');
 
       const interestExpense = result.expenses[5];
       expect(interestExpense.description).toBe('Interest - 2 % p.a.');
       expect(interestExpense.amount).toBe(54.86);
-      expect(interestExpense.category).toBe('Interest Income');
+      expect(interestExpense.category).toBe('Uncategorized');
       expect(interestExpense.tags).toContain('interest');
     });
 
@@ -311,17 +311,6 @@ Nº Orden,Fecha Oper,Fecha Valor,Concepto,Descripción,Referencia,Importe,Saldo
       expect(service['parseTradeRepublicAmount']('')).toBe(null);
     });
 
-    it('should map Trade Republic categories correctly', () => {
-      // Act & Assert - Test the private method directly
-      expect(service['mapTradeRepublicCategory']('McDonald\'s', '')).toBe('Food & Dining');
-      expect(service['mapTradeRepublicCategory']('Gasolinera ARALAR', '')).toBe('Transportation');
-      expect(service['mapTradeRepublicCategory']('Mercadona', '')).toBe('Groceries');
-      expect(service['mapTradeRepublicCategory']('Interest', '2 % p.a.')).toBe('Interest Income');
-      expect(service['mapTradeRepublicCategory']('Lupe', 'Bizum')).toBe('Transfer');
-      expect(service['mapTradeRepublicCategory']('YouTube', '')).toBe('Entertainment');
-      expect(service['mapTradeRepublicCategory']('Synergym', '')).toBe('Health & Fitness');
-      expect(service['mapTradeRepublicCategory']('Unknown Store', '')).toBe('Uncategorized');
-    });
 
     it('should extract Trade Republic tags correctly', () => {
       // Act & Assert - Test the private method directly

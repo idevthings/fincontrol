@@ -450,7 +450,7 @@ export class FileProcessingService {
       date: date.toISOString().split('T')[0],
       description,
       amount,
-      category: this.mapTradeRepublicCategory(row.title, row.subtitle),
+      category: 'Uncategorized',
       currency: this.sanitizeText(row.currency) || 'EUR',
       account: 'Trade Republic',
       tags: this.extractTradeRepublicTags(row.title, row.subtitle)
@@ -481,41 +481,6 @@ export class FileProcessingService {
     }
   }
 
-  private mapTradeRepublicCategory(title: string, subtitle: string): string {
-    const titleLower = title.toLowerCase();
-    const subtitleLower = subtitle ? subtitle.toLowerCase() : '';
-
-    // Map common Trade Republic categories
-    if (titleLower.includes('mcdonald') || titleLower.includes('burger') || titleLower.includes('restaurant')) {
-      return 'Food & Dining';
-    }
-    if (titleLower.includes('gasolinera') || titleLower.includes('fuel') || titleLower.includes('gas')) {
-      return 'Transportation';
-    }
-    if (titleLower.includes('mercadona') || titleLower.includes('supermarket') || titleLower.includes('grocery')) {
-      return 'Groceries';
-    }
-    if (titleLower.includes('interest') || subtitleLower.includes('interest')) {
-      return 'Interest Income';
-    }
-    if (subtitleLower.includes('bizum')) {
-      return 'Transfer';
-    }
-    if (subtitleLower.includes('saving') || subtitleLower.includes('round up')) {
-      return 'Savings';
-    }
-    if (titleLower.includes('youtube') || titleLower.includes('netflix') || titleLower.includes('subscription')) {
-      return 'Entertainment';
-    }
-    if (titleLower.includes('parking') || titleLower.includes('telpark')) {
-      return 'Transportation';
-    }
-    if (titleLower.includes('gym') || titleLower.includes('synergym')) {
-      return 'Health & Fitness';
-    }
-
-    return 'Uncategorized';
-  }
 
   private extractTradeRepublicTags(title: string, subtitle: string): string[] | undefined {
     const tags: string[] = [];
