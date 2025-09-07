@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/fincontrol/browser",
+  "framework": "angular"
+}
