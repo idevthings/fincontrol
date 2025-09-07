@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  supabaseUrl: 'your-supabase-url-here',
-  supabaseKey: 'your-supabase-anon-key-here'
+  supabaseUrl: process.env['SUPABASE_URL'] || '',
+  supabaseKey: process.env['SUPABASE_ANON_KEY'] || ''
 };

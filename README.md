@@ -37,15 +37,21 @@ npm install
 
 ### 4. Environment Configuration
 
-Update `src/environments/environment.ts`:
+**⚠️ SECURITY: Never commit actual credentials to version control!**
 
-```typescript
-export const environment = {
-  production: false,
-  supabaseUrl: 'your-supabase-project-url',
-  supabaseKey: 'your-supabase-anon-key'
-};
-```
+1. **Create environment file:**
+   ```bash
+   # Copy the example file
+   cp .env.example .env.local
+   ```
+
+2. **Update `.env.local` with your actual credentials:**
+   ```
+   SUPABASE_URL=your-supabase-project-url
+   SUPABASE_ANON_KEY=your-supabase-anon-key
+   ```
+
+3. **Environment files are automatically loaded** - no need to modify `environment.ts` files.
 
 ### 5. Database Schema
 
@@ -225,14 +231,11 @@ The build artifacts will be stored in the `dist/fincontrol/` directory.
 
 ### Environment Setup for Production
 
-1. **Supabase Configuration:**
-   ```typescript
-   // src/environments/environment.prod.ts
-   export const environment = {
-     production: true,
-     supabaseUrl: 'your-production-supabase-url',
-     supabaseKey: 'your-production-supabase-anon-key'
-   };
+1. **Environment Variables (Vercel/Netlify):**
+   Set these environment variables in your deployment platform:
+   ```
+   SUPABASE_URL=your-production-supabase-url
+   SUPABASE_ANON_KEY=your-production-supabase-anon-key
    ```
 
 2. **Database Setup:**
@@ -246,6 +249,11 @@ The build artifacts will be stored in the `dist/fincontrol/` directory.
    # Deploy the dist/fincontrol directory to your hosting service
    # Examples: Vercel, Netlify, AWS S3, Firebase Hosting, etc.
    ```
+
+4. **Vercel Deployment:**
+   - Connect your GitHub repository to Vercel
+   - Add environment variables in Vercel dashboard: Settings → Environment Variables
+   - Deploy automatically on git push
 
 ### Security Considerations
 
