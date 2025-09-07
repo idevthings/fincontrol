@@ -238,6 +238,188 @@ export const SUBCATEGORIES: Subcategory[] = [
     name: 'SS',
     categoryId: 'tax',
     description: 'Social Security payments'
+  },
+
+  // Custom categories that need subcategories
+  {
+    id: 'general',
+    name: 'General',
+    categoryId: 'ir_hal6_1drch',
+    description: 'General expenses'
+  },
+  {
+    id: 'misc',
+    name: 'Miscellaneous',
+    categoryId: 'ir_hal6_1drch',
+    description: 'Miscellaneous expenses'
+  },
+  {
+    id: 'general_z12',
+    name: 'General',
+    categoryId: 'ir_z12_4izq',
+    description: 'General expenses'
+  },
+  {
+    id: 'misc_z12',
+    name: 'Miscellaneous',
+    categoryId: 'ir_z12_4izq',
+    description: 'Miscellaneous expenses'
+  },
+  {
+    id: 'credit_payment',
+    name: 'Credit Payment',
+    categoryId: 'credits',
+    description: 'Credit card payments'
+  },
+  {
+    id: 'loan_payment',
+    name: 'Loan Payment',
+    categoryId: 'credits',
+    description: 'Loan payments'
+  },
+  {
+    id: 'general_other',
+    name: 'General',
+    categoryId: 'other',
+    description: 'General other expenses'
+  },
+  {
+    id: 'fees',
+    name: 'Fees',
+    categoryId: 'other',
+    description: 'Various fees'
+  },
+  {
+    id: 'entertainment',
+    name: 'Entertainment',
+    categoryId: 'fun',
+    description: 'General entertainment'
+  },
+  {
+    id: 'leisure',
+    name: 'Leisure',
+    categoryId: 'fun',
+    description: 'Leisure activities'
+  },
+  {
+    id: 'medical',
+    name: 'Medical',
+    categoryId: 'health',
+    description: 'Medical expenses'
+  },
+  {
+    id: 'wellness',
+    name: 'Wellness',
+    categoryId: 'health',
+    description: 'Wellness and fitness'
+  },
+  {
+    id: 'rental',
+    name: 'Rental',
+    categoryId: 'housing',
+    description: 'Rental expenses'
+  },
+  {
+    id: 'utilities',
+    name: 'Utilities',
+    categoryId: 'housing',
+    description: 'Utility bills'
+  },
+  {
+    id: 'salary',
+    name: 'Salary',
+    categoryId: 'income',
+    description: 'Salary income'
+  },
+  {
+    id: 'bonus',
+    name: 'Bonus',
+    categoryId: 'income',
+    description: 'Bonus income'
+  },
+  {
+    id: 'income_tax',
+    name: 'Income Tax',
+    categoryId: 'tax',
+    description: 'Income tax payments'
+  },
+  {
+    id: 'property_tax',
+    name: 'Property Tax',
+    categoryId: 'tax',
+    description: 'Property tax payments'
+  },
+  {
+    id: 'apartment_rent',
+    name: 'Apartment Rent',
+    categoryId: 'pisos',
+    description: 'Apartment rental expenses'
+  },
+  {
+    id: 'apartment_maintenance',
+    name: 'Maintenance',
+    categoryId: 'pisos',
+    description: 'Apartment maintenance'
+  },
+  {
+    id: 'apartment_rental',
+    name: 'Apartment Rental',
+    categoryId: 'apartments',
+    description: 'Apartment rental expenses'
+  },
+  {
+    id: 'apartment_management',
+    name: 'Management',
+    categoryId: 'apartments',
+    description: 'Apartment management'
+  },
+  {
+    id: 'recovery',
+    name: 'Recovery',
+    categoryId: 'addiction',
+    description: 'Recovery related expenses'
+  },
+  {
+    id: 'treatment',
+    name: 'Treatment',
+    categoryId: 'addiction',
+    description: 'Treatment expenses'
+  },
+  {
+    id: 'equipment',
+    name: 'Equipment',
+    categoryId: 'work',
+    description: 'Work equipment'
+  },
+  {
+    id: 'software',
+    name: 'Software',
+    categoryId: 'work',
+    description: 'Work software'
+  },
+  {
+    id: 'stocks',
+    name: 'Stocks',
+    categoryId: 'investment',
+    description: 'Stock investments'
+  },
+  {
+    id: 'bonds',
+    name: 'Bonds',
+    categoryId: 'investment',
+    description: 'Bond investments'
+  },
+  {
+    id: 'donations',
+    name: 'Donations',
+    categoryId: 'charity',
+    description: 'Charitable donations'
+  },
+  {
+    id: 'volunteering',
+    name: 'Volunteering',
+    categoryId: 'charity',
+    description: 'Volunteering expenses'
   }
 ];
 

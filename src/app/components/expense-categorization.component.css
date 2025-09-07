@@ -1,0 +1,252 @@
+.categorization-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.loading-container p {
+  margin-top: 16px;
+  color: #666;
+}
+
+.no-expenses-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.no-expenses-card {
+  text-align: center;
+  max-width: 400px;
+}
+
+.no-expenses-content {
+  padding: 40px 20px;
+}
+
+.no-expenses-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #4caf50;
+  margin-bottom: 16px;
+}
+
+.no-expenses-content h2 {
+  margin: 16px 0 8px 0;
+  color: #333;
+}
+
+.no-expenses-content p {
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.categorization-card-container {
+  display: flex;
+  justify-content: center;
+}
+
+.categorization-card {
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+.expense-title {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+  word-break: break-word;
+}
+
+.expense-date {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.expense-details {
+  margin: 20px 0;
+}
+
+.amount-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.amount {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.account {
+  background-color: #f5f5f5;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.selection-section {
+  margin: 24px 0;
+}
+
+.selection-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.selection-button {
+  flex: 1;
+  min-width: 140px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.selection-panel {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.selection-panel h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.subcategory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+
+.category-chip,
+.subcategory-chip {
+  min-height: 36px;
+  border-radius: 18px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 8px 16px;
+  font-family: inherit;
+  outline: none;
+}
+
+/* Default background for subcategories */
+.subcategory-chip {
+  background-color: #6c757d;
+}
+
+.category-chip:hover,
+.subcategory-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.category-chip.selected,
+.subcategory-chip.selected {
+  border-color: #1976d2;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  transform: scale(1.05);
+}
+
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  margin: 0;
+}
+
+.save-button {
+  min-width: 140px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .categorization-container {
+    padding: 10px;
+  }
+  
+  .selection-row {
+    flex-direction: column;
+  }
+  
+  .selection-button {
+    min-width: auto;
+  }
+  
+  .category-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+  
+  .subcategory-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+  
+  .card-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .save-button {
+    width: 100%;
+  }
+}
+
+/* Animation for smooth transitions */
+.selection-panel {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

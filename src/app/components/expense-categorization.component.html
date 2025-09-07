@@ -1,0 +1,123 @@
+<div class="categorization-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading uncategorized expenses...</p>
+  </div>
+
+  <!-- No Expenses State -->
+  <div *ngIf="!isLoading() && !currentExpense()" class="no-expenses-container">
+    <mat-card class="no-expenses-card">
+      <mat-card-content>
+        <div class="no-expenses-content">
+          <mat-icon class="no-expenses-icon">check_circle</mat-icon>
+          <h2>All caught up!</h2>
+          <p>No uncategorized expenses found.</p>
+          <button mat-raised-button color="primary" (click)="loadNextUncategorizedExpense()">
+            <mat-icon>refresh</mat-icon>
+            Refresh
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Main Categorization Card -->
+  <div *ngIf="!isLoading() && currentExpense()" class="categorization-card-container">
+    <mat-card class="categorization-card">
+      <mat-card-header>
+        <mat-card-title class="expense-title">
+          {{ currentExpense()?.description }}
+        </mat-card-title>
+        <mat-card-subtitle class="expense-date">
+          {{ currentExpense()?.date | date:'medium' }}
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Expense Details -->
+        <div class="expense-details">
+          <div class="amount-section">
+            <span class="amount">{{ currentExpense()?.amount | currency:currentExpense()?.currency:'symbol':'1.2-2' }}</span>
+            <span *ngIf="currentExpense()?.account" class="account">{{ currentExpense()?.account }}</span>
+          </div>
+        </div>
+
+        <!-- Category Selection -->
+        <div class="selection-section">
+          <div class="selection-row">
+            <button 
+              mat-raised-button 
+              [color]="selectedCategory() ? 'primary' : 'accent'"
+              (click)="onCategoryClick()"
+              class="selection-button">
+              <mat-icon>category</mat-icon>
+              {{ selectedCategory()?.name || 'Select Category' }}
+            </button>
+
+            <button 
+              mat-raised-button 
+              [color]="selectedSubcategory() ? 'primary' : 'accent'"
+              [disabled]="!selectedCategory()"
+              (click)="onSubcategoryClick()"
+              class="selection-button">
+              <mat-icon>label</mat-icon>
+              {{ selectedSubcategory()?.name || 'Select Subcategory' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Category Selection Panel -->
+        <div *ngIf="showCategorySelection()" class="selection-panel">
+          <h3>Select Category</h3>
+          <div class="category-grid">
+            <button 
+              *ngFor="let category of categories" 
+              [class.selected]="selectedCategory()?.id === category.id"
+              (click)="selectCategory(category)"
+              class="category-chip"
+              [style.background-color]="category.color">
+              {{ category.name }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Subcategory Selection Panel -->
+        <div *ngIf="showSubcategorySelection()" class="selection-panel">
+          <h3>Select Subcategory</h3>
+          <div class="subcategory-grid">
+            <button 
+              *ngFor="let subcategory of availableSubcategories()" 
+              [class.selected]="selectedSubcategory()?.id === subcategory.id"
+              (click)="selectSubcategory(subcategory)"
+              class="subcategory-chip"
+              [title]="subcategory.description">
+              {{ subcategory.name }}
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions class="card-actions">
+        <button 
+          mat-button 
+          (click)="skipExpense()"
+          [disabled]="isSaving()">
+          <mat-icon>skip_next</mat-icon>
+          Skip
+        </button>
+        
+        <button 
+          mat-raised-button 
+          color="primary"
+          [disabled]="!isReadyToSave() || isSaving()"
+          (click)="saveCategorization()"
+          class="save-button">
+          <mat-spinner *ngIf="isSaving()" diameter="20"></mat-spinner>
+          <mat-icon *ngIf="!isSaving()">save</mat-icon>
+          {{ isSaving() ? 'Saving...' : 'Save & Next' }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

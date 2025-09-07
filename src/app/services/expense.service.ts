@@ -103,4 +103,28 @@ export class ExpenseService {
 
     return true;
   }
+
+  async getUncategorizedExpenses(limit = 10): Promise<{ data: Expense[] | null; error: string | null }> {
+    try {
+      const { data, error } = await this.supabaseConfig.client
+        .from('expenses')
+        .select('*')
+        .or('category.is.null,category.eq.,category.eq.Uncategorized')
+        .order('date', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        console.error('Error fetching uncategorized expenses:', error);
+        return { data: null, error: error.message };
+      }
+
+      return { data: data || [], error: null };
+    } catch (error) {
+      console.error('Exception in getUncategorizedExpenses:', error);
+      return { 
+        data: null, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      };
+    }
+  }
 }

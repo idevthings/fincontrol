@@ -6,15 +6,19 @@
       </h1>
       <p class="app-subtitle">Finance Expense Tracking App</p>
     </div>
+    <div class="nav-buttons">
+      <button mat-button routerLink="/categorize" routerLinkActive="active">
+        <mat-icon>category</mat-icon>
+        Categorize
+      </button>
+      <button mat-button routerLink="/import" routerLinkActive="active">
+        <mat-icon>upload</mat-icon>
+        Import
+      </button>
+    </div>
   </mat-toolbar>
 
   <main class="app-main">
-    <mat-card class="main-card">
-      <mat-card-content>
-        <app-expense-import></app-expense-import>
-      </mat-card-content>
-    </mat-card>
+    <router-outlet />
   </main>
 </div>
-
-<router-outlet />
