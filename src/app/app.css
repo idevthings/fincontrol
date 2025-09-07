@@ -7,7 +7,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 2rem 2rem 2rem 2rem;
+  padding: 3rem 2rem 3rem 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;
   position: relative;
@@ -26,7 +26,7 @@
 }
 
 .header-content {
-  text-align: left;
+  text-align: center;
   position: relative;
   z-index: 1;
   flex: 1;
@@ -101,6 +101,8 @@
   border-radius: 8px;
   padding: 8px 16px;
   transition: all 0.3s ease;
+  width: 120px;
+  text-align: center;
 }
 
 .nav-buttons button:hover {

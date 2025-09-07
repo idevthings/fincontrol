@@ -7,13 +7,9 @@
       <p class="app-subtitle">Finance Expense Tracking App</p>
     </div>
     <div class="nav-buttons">
-      <button mat-button routerLink="/categorize" routerLinkActive="active">
-        <mat-icon>category</mat-icon>
-        Categorize
-      </button>
-      <button mat-button routerLink="/import" routerLinkActive="active">
-        <mat-icon>upload</mat-icon>
-        Import
+      <button mat-button (click)="toggleMode()" [class.active]="isImportMode">
+        <mat-icon>{{ isImportMode() ? 'upload' : 'category' }}</mat-icon>
+        {{ isImportMode() ? 'Import' : 'Categorize' }}
       </button>
     </div>
   </mat-toolbar>
