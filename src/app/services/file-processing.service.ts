@@ -55,6 +55,12 @@ export class FileProcessingService {
         expenses = result.expenses;
         errors = result.errors;
         console.log('[FileProcessingService] Trade Republic parsing complete. Expenses:', expenses.length, 'Errors:', errors.length);
+      } else if (bankFormat === 'laboralkutxa') {
+        console.log('[FileProcessingService] Using PapaParse for Laboral Kutxa CSV');
+        const result = await this.parseLaboralKutxaCSVWithPapa(text);
+        expenses = result.expenses;
+        errors = result.errors;
+        console.log('[FileProcessingService] Laboral Kutxa parsing complete. Expenses:', expenses.length, 'Errors:', errors.length);
       } else {
         console.log('[FileProcessingService] Using PapaParse for generic CSV');
         const result = await this.parseGenericCSVWithPapa(text);
@@ -147,6 +153,16 @@ export class FileProcessingService {
           firstLine.includes('title') && firstLine.includes('subtitle') && 
           firstLine.includes('value') && firstLine.includes('currency')) {
         return 'traderepublic';
+      }
+    }
+
+    // Check for Laboral Kutxa format
+    if (lines.length > 0) {
+      const firstLine = lines[0].trim();
+      if (firstLine.includes('Cantidades expresadas en euros') && 
+          firstLine.includes('Fecha') && firstLine.includes('Concepto') && 
+          firstLine.includes('Importe') && firstLine.includes('Saldo Posterior')) {
+        return 'laboralkutxa';
       }
     }
 
@@ -280,6 +296,62 @@ export class FileProcessingService {
           } catch (error) {
             const errorMsg = `CSV parsing error: ${error instanceof Error ? error.message : 'Unknown error'}`;
             console.error('[FileProcessingService] Exception in parseTradeRepublicCSVWithPapa:', error);
+            errors.push(errorMsg);
+            resolve({ expenses, errors });
+          }
+        },
+        error: (error: any) => {
+          console.error('[FileProcessingService] PapaParse error:', error);
+          errors.push(`PapaParse error: ${error.message}`);
+          resolve({ expenses, errors });
+        }
+      });
+    });
+  }
+
+  private async parseLaboralKutxaCSVWithPapa(csvText: string): Promise<{ expenses: Expense[]; errors: string[] }> {
+    console.log('[FileProcessingService] Starting Laboral Kutxa CSV parsing with PapaParse');
+    const expenses: Expense[] = [];
+    const errors: string[] = [];
+
+    return new Promise((resolve, reject) => {
+      Papa.parse(csvText, {
+        delimiter: ';', // Laboral Kutxa uses semicolons
+        header: true, // Laboral Kutxa has headers
+        skipEmptyLines: true,
+        quoteChar: '"',
+        escapeChar: '"',
+        complete: (results) => {
+          try {
+            console.log('[FileProcessingService] PapaParse completed. Total rows:', results.data.length);
+
+            if (results.errors && results.errors.length > 0) {
+              console.warn('[FileProcessingService] PapaParse warnings:', results.errors);
+            }
+
+            // Process data rows
+            for (let i = 0; i < results.data.length; i++) {
+              const row = results.data[i] as any;
+              if (!row || Object.keys(row).length === 0) {
+                continue; // Skip empty rows
+              }
+
+              try {
+                const expense = this.parseLaboralKutxaRow(row);
+                if (expense) {
+                  expenses.push(expense);
+                }
+              } catch (error) {
+                const errorMsg = `Row ${i + 1}: ${error instanceof Error ? error.message : 'Invalid data'}`;
+                errors.push(errorMsg);
+              }
+            }
+
+            console.log('[FileProcessingService] Laboral Kutxa parsing summary - Total rows processed:', results.data.length, 'Valid expenses:', expenses.length, 'Errors:', errors.length);
+            resolve({ expenses, errors });
+          } catch (error) {
+            const errorMsg = `CSV parsing error: ${error instanceof Error ? error.message : 'Unknown error'}`;
+            console.error('[FileProcessingService] Exception in parseLaboralKutxaCSVWithPapa:', error);
             errors.push(errorMsg);
             resolve({ expenses, errors });
           }
@@ -481,6 +553,104 @@ export class FileProcessingService {
     }
   }
 
+  private parseLaboralKutxaRow(row: any): Expense | null {
+    if (!row.Fecha || !row.Concepto || !row.Importe) {
+      throw new Error('Missing required fields: Fecha, Concepto, or Importe');
+    }
+
+    // Parse date from DD/MM/YYYY format
+    const date = this.parseLaboralKutxaDate(row.Fecha);
+    if (!date) {
+      throw new Error('Invalid date format');
+    }
+
+    // Parse amount (handle Spanish formatting with comma as decimal separator)
+    const amount = this.parseLaboralKutxaAmount(row.Importe);
+    if (amount === null) {
+      throw new Error('Invalid amount format');
+    }
+
+    // Create description from Concepto
+    const description = this.sanitizeText(row.Concepto);
+    if (!description) {
+      throw new Error('Missing description');
+    }
+
+    return {
+      date: date.toISOString().split('T')[0],
+      description,
+      amount,
+      category: 'Uncategorized',
+      currency: 'EUR', // Laboral Kutxa is Spanish bank, uses EUR
+      account: 'Laboral Kutxa',
+      tags: this.extractLaboralKutxaTags(row.Concepto)
+    };
+  }
+
+  private parseLaboralKutxaDate(dateStr: string): Date | null {
+    if (!dateStr) return null;
+
+    // Laboral Kutxa format: DD/MM/YYYY
+    const parts = dateStr.split('/');
+    if (parts.length !== 3) return null;
+
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // JavaScript months are 0-indexed
+    const year = parseInt(parts[2], 10);
+
+    if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+    if (day < 1 || day > 31 || month < 0 || month > 11 || year < 1900 || year > 2100) return null;
+
+    const date = new Date(year, month, day);
+    return isNaN(date.getTime()) ? null : date;
+  }
+
+  private parseLaboralKutxaAmount(amountStr: string): number | null {
+    if (!amountStr) return null;
+
+    try {
+      // Remove quotes and clean the string
+      let cleanAmount = amountStr.replace(/"/g, '').trim();
+
+      // Handle Spanish number formatting (comma as decimal separator)
+      // Replace dots (thousands separators) and then replace comma with dot
+      cleanAmount = cleanAmount.replace(/\./g, '').replace(',', '.');
+
+      const amount = parseFloat(cleanAmount);
+      return isNaN(amount) ? null : amount;
+    } catch {
+      return null;
+    }
+  }
+
+  private extractLaboralKutxaTags(concepto: string): string[] | undefined {
+    if (!concepto || concepto.trim() === '') return undefined;
+
+    const tags: string[] = [];
+    const conceptoLower = concepto.toLowerCase();
+
+    // Extract useful information from concept
+    if (conceptoLower.includes('nomina') || conceptoLower.includes('salario')) {
+      tags.push('salary');
+    }
+    if (conceptoLower.includes('prestamo')) {
+      tags.push('loan');
+    }
+    if (conceptoLower.includes('transferencia') || conceptoLower.includes('trfi')) {
+      tags.push('transfer');
+    }
+    if (conceptoLower.includes('aport') || conceptoLower.includes('plan')) {
+      tags.push('investment');
+    }
+    if (conceptoLower.includes('seguro') || conceptoLower.includes('rbo')) {
+      tags.push('insurance');
+    }
+    if (conceptoLower.includes('comision') || conceptoLower.includes('gasto')) {
+      tags.push('fee');
+    }
+
+    return tags.length > 0 ? tags : undefined;
+  }
 
   private extractTradeRepublicTags(title: string, subtitle: string): string[] | undefined {
     const tags: string[] = [];

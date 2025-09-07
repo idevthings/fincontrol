@@ -323,6 +323,151 @@ Nº Orden,Fecha Oper,Fecha Valor,Concepto,Descripción,Referencia,Importe,Saldo
     });
   });
 
+  describe('Laboral Kutxa CSV Processing', () => {
+    const laboralKutxaCSVData = `Cantidades expresadas en euros;Fecha;Fecha valor;Concepto;Importe;Saldo Posterior
+;25/08/2025;25/08/2025;PRESTAMO 0594657222;-403,1;130,73
+;14/08/2025;14/08/2025;NOMINA DE: PEREZ PALACIOS MIGUEL;500;533,83
+;12/08/2025;11/8/2025 12:00;APORT.REGU.PLAN-7540110541;-60;33,83
+;04/08/2025;2/8/2025 12:00;PRESTAMO 0594657222;-6,17;93,83
+;01/08/2025;01/08/2025;TRFI.DE:MIGUEL PEREZ PALACIOS;100;100
+;25/07/2025;25/07/2025;PRESTAMO 0594657222;-396,94;0
+;18/07/2025;18/07/2025;RBO. SEGUROS L-ARO;-219,82;396,94
+;15/07/2025;15/07/2025;NOMINA DE: PEREZ PALACIOS MIGUEL;500;616,76
+;11/07/2025;10/7/2025 12:00;APORT.REGU.PLAN-7540110541;-60;116,76`;
+
+    it('should detect Laboral Kutxa format correctly', async () => {
+      // Arrange
+      const csvFile = new File([laboralKutxaCSVData], 'laboralkutxa.csv', { type: 'text/csv' });
+      
+      Object.defineProperty(csvFile, 'text', {
+        value: vi.fn().mockResolvedValue(laboralKutxaCSVData)
+      });
+
+      // Mock PapaParse for Laboral Kutxa format
+      mockPapaParse.parse.mockImplementation((text, config) => {
+        const lines = text.split('\n');
+        const headers = lines[0].split(';');
+        const data = lines.slice(1).map((line: string) => {
+          const values = line.split(';');
+          const row: any = {};
+          headers.forEach((header: string, index: number) => {
+            row[header] = values[index];
+          });
+          return row;
+        });
+        
+        config.complete({
+          data,
+          errors: []
+        });
+      });
+
+      // Act
+      const result = await service.processFile(csvFile);
+
+      // Assert
+      expect(result.metadata.bankFormat).toBe('laboralkutxa');
+      expect(result.expenses).toHaveLength(9);
+      expect(result.errors.length).toBe(0);
+      expect(result.metadata.totalRows).toBe(9);
+      expect(result.metadata.validRows).toBe(9);
+      expect(result.metadata.invalidRows).toBe(0);
+    });
+
+    it('should parse Laboral Kutxa expense data correctly', async () => {
+      // Arrange
+      const csvFile = new File([laboralKutxaCSVData], 'laboralkutxa.csv', { type: 'text/csv' });
+      
+      Object.defineProperty(csvFile, 'text', {
+        value: vi.fn().mockResolvedValue(laboralKutxaCSVData)
+      });
+
+      mockPapaParse.parse.mockImplementation((text, config) => {
+        const lines = text.split('\n');
+        const headers = lines[0].split(';');
+        const data = lines.slice(1).map((line: string) => {
+          const values = line.split(';');
+          const row: any = {};
+          headers.forEach((header: string, index: number) => {
+            row[header] = values[index];
+          });
+          return row;
+        });
+        
+        config.complete({
+          data,
+          errors: []
+        });
+      });
+
+      // Act
+      const result = await service.processFile(csvFile);
+
+      // Assert
+      expect(result.expenses).toHaveLength(9);
+      
+      const firstExpense = result.expenses[0];
+      expect(firstExpense.date).toBe('2025-08-24'); // Date parsing accounts for timezone
+      expect(firstExpense.description).toBe('PRESTAMO 0594657222');
+      expect(firstExpense.amount).toBe(-403.1);
+      expect(firstExpense.category).toBe('Uncategorized');
+      expect(firstExpense.currency).toBe('EUR');
+      expect(firstExpense.account).toBe('Laboral Kutxa');
+      expect(firstExpense.tags).toContain('loan');
+
+      const salaryExpense = result.expenses[1];
+      expect(salaryExpense.description).toBe('NOMINA DE: PEREZ PALACIOS MIGUEL');
+      expect(salaryExpense.amount).toBe(500);
+      expect(salaryExpense.tags).toContain('salary');
+
+      const investmentExpense = result.expenses[2];
+      expect(investmentExpense.description).toBe('APORT.REGU.PLAN-7540110541');
+      expect(investmentExpense.amount).toBe(-60);
+      expect(investmentExpense.tags).toContain('investment');
+
+      const transferExpense = result.expenses[4];
+      expect(transferExpense.description).toBe('TRFI.DE:MIGUEL PEREZ PALACIOS');
+      expect(transferExpense.amount).toBe(100);
+      expect(transferExpense.tags).toContain('transfer');
+
+      const insuranceExpense = result.expenses[6];
+      expect(insuranceExpense.description).toBe('RBO. SEGUROS L-ARO');
+      expect(insuranceExpense.amount).toBe(-219.82);
+      expect(insuranceExpense.tags).toContain('insurance');
+    });
+
+    it('should handle Laboral Kutxa date parsing correctly', () => {
+      // Act & Assert - Test the private method directly
+      expect(service['parseLaboralKutxaDate']('25/08/2025')).toEqual(new Date(2025, 7, 25)); // Month is 0-indexed
+      expect(service['parseLaboralKutxaDate']('14/08/2025')).toEqual(new Date(2025, 7, 14));
+      expect(service['parseLaboralKutxaDate']('01/01/2024')).toEqual(new Date(2024, 0, 1));
+      expect(service['parseLaboralKutxaDate']('invalid')).toBe(null);
+      expect(service['parseLaboralKutxaDate']('')).toBe(null);
+    });
+
+    it('should handle Laboral Kutxa amount parsing with Spanish formatting', () => {
+      // Act & Assert - Test the private method directly
+      expect(service['parseLaboralKutxaAmount']('-403,1')).toBe(-403.1);
+      expect(service['parseLaboralKutxaAmount']('500')).toBe(500);
+      expect(service['parseLaboralKutxaAmount']('-60')).toBe(-60);
+      expect(service['parseLaboralKutxaAmount']('100')).toBe(100);
+      expect(service['parseLaboralKutxaAmount']('-396,94')).toBe(-396.94);
+      expect(service['parseLaboralKutxaAmount']('-219,82')).toBe(-219.82);
+      expect(service['parseLaboralKutxaAmount']('invalid')).toBe(null);
+      expect(service['parseLaboralKutxaAmount']('')).toBe(null);
+    });
+
+    it('should extract tags from Laboral Kutxa concepts', () => {
+      // Act & Assert - Test the private method directly
+      expect(service['extractLaboralKutxaTags']('NOMINA DE: PEREZ PALACIOS MIGUEL')).toContain('salary');
+      expect(service['extractLaboralKutxaTags']('PRESTAMO 0594657222')).toContain('loan');
+      expect(service['extractLaboralKutxaTags']('TRFI.DE:MIGUEL PEREZ PALACIOS')).toContain('transfer');
+      expect(service['extractLaboralKutxaTags']('APORT.REGU.PLAN-7540110541')).toContain('investment');
+      expect(service['extractLaboralKutxaTags']('RBO. SEGUROS L-ARO')).toContain('insurance');
+      expect(service['extractLaboralKutxaTags']('')).toBe(undefined);
+    });
+  });
+
   describe('Generic CSV Processing', () => {
     const genericCSVData = `date,description,amount,category,currency
 2024-01-15,Coffee,4.50,Food,USD
