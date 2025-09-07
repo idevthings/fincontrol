@@ -71,6 +71,7 @@ describe('FileProcessingService', () => {
           description: 'Test expense',
           amount: 100.50,
           category: 'Food',
+          subcategory: 'Restaurant',
           currency: 'USD'
         }
       ];
@@ -562,6 +563,7 @@ Nº Orden,Fecha Oper,Fecha Valor,Concepto,Descripción,Referencia,Importe,Saldo
           description: 'Coffee',
           amount: 4.50,
           category: 'Food',
+          subcategory: 'Beverages',
           currency: 'USD'
         },
         {
@@ -598,6 +600,7 @@ Nº Orden,Fecha Oper,Fecha Valor,Concepto,Descripción,Referencia,Importe,Saldo
             description: 'Coffee',
             amount: 4.50,
             category: 'Food',
+            subcategory: 'Beverages',
             currency: 'USD'
           }
         ]

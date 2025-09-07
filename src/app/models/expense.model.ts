@@ -4,6 +4,7 @@ export interface Expense {
   description: string;
   amount: number;
   category: string;
+  subcategory?: string;
   currency: string;
   account?: string;
   tags?: string[];

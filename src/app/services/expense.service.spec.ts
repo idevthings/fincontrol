@@ -50,6 +50,7 @@ describe('ExpenseService', () => {
         description: 'Coffee',
         amount: 4.50,
         category: 'Food',
+        subcategory: 'Beverages',
         currency: 'USD',
         account: 'Checking'
       },
@@ -59,6 +60,7 @@ describe('ExpenseService', () => {
         description: 'Gas',
         amount: 45.00,
         category: 'Transportation',
+        subcategory: 'Fuel',
         currency: 'USD',
         account: 'Credit Card'
       }

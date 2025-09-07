@@ -371,6 +371,7 @@ export class FileProcessingService {
     const description = this.sanitizeText(row.description || row.Description || row.memo || row.Memo || row.details || row.Details);
     const amount = this.parseAmount(row.amount || row.Amount || row.value || row.Value || row.total || row.Total);
     const category = this.sanitizeText(row.category || row.Category || row.type || row.Type || 'Uncategorized') || 'Uncategorized';
+    const subcategory = this.sanitizeText(row.subcategory || row.Subcategory || row.sub_category || row['Sub Category']);
     const currency = this.sanitizeText(row.currency || row.Currency || 'USD') || 'USD';
 
     if (!date) {
@@ -390,6 +391,7 @@ export class FileProcessingService {
       description,
       amount,
       category,
+      subcategory,
       currency,
       account: this.sanitizeText(row.account || row.Account || row.account_name || row['Account Name'])
     };
@@ -429,6 +431,7 @@ export class FileProcessingService {
       description,
       amount,
       category,
+      subcategory: undefined, // Ibercaja doesn't provide subcategory info
       currency: 'EUR', // Ibercaja is Spanish bank, uses EUR
       account: 'Ibercaja', // Default account name
       tags: this.extractIbercajaTags(referencia)
@@ -523,6 +526,7 @@ export class FileProcessingService {
       description,
       amount,
       category: 'Uncategorized',
+      subcategory: undefined, // Trade Republic doesn't provide subcategory info
       currency: this.sanitizeText(row.currency) || 'EUR',
       account: 'Trade Republic',
       tags: this.extractTradeRepublicTags(row.title, row.subtitle)
@@ -581,6 +585,7 @@ export class FileProcessingService {
       description,
       amount,
       category: 'Uncategorized',
+      subcategory: undefined, // Laboral Kutxa doesn't provide subcategory info
       currency: 'EUR', // Laboral Kutxa is Spanish bank, uses EUR
       account: 'Laboral Kutxa',
       tags: this.extractLaboralKutxaTags(row.Concepto)
@@ -729,6 +734,7 @@ export class FileProcessingService {
     const description = this.sanitizeText(row.description || row.Description || row.memo || row.Memo || row.details || row.Details);
     const amount = this.parseAmount(row.amount || row.Amount || row.value || row.Value || row.total || row.Total);
     const category = this.sanitizeText(row.category || row.Category || row.type || row.Type || 'Uncategorized');
+    const subcategory = this.sanitizeText(row.subcategory || row.Subcategory || row.sub_category || row['Sub Category']);
     const currency = this.sanitizeText(row.currency || row.Currency || 'USD');
     const account = this.sanitizeText(row.account || row.Account || row.account_name || row['Account Name']);
 
@@ -749,6 +755,7 @@ export class FileProcessingService {
       description: String(description).trim(),
       amount,
       category: String(category).trim(),
+      subcategory: subcategory ? String(subcategory).trim() : undefined,
       currency: String(currency).trim(),
       account: account ? String(account).trim() : undefined,
       tags: this.parseTags(row.tags || row.Tags)

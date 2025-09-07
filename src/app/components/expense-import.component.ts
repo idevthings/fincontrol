@@ -38,7 +38,7 @@ export class ExpenseImportComponent {
   importResult: ExpenseImportResult | null = null;
   hasConfigurationError = false;
   configurationError = '';
-  displayedColumns: string[] = ['date', 'description', 'amount', 'category', 'currency'];
+  displayedColumns: string[] = ['date', 'description', 'amount', 'category', 'subcategory', 'currency'];
 
   private fileProcessingService = inject(FileProcessingService);
   private expenseService = inject(ExpenseService);

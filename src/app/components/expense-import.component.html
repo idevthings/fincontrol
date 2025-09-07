@@ -193,6 +193,11 @@
                     <td mat-cell *matCellDef="let expense">{{ expense.category }}</td>
                   </ng-container>
                   
+                  <ng-container matColumnDef="subcategory">
+                    <th mat-header-cell *matHeaderCellDef>Subcategory</th>
+                    <td mat-cell *matCellDef="let expense">{{ expense.subcategory || '-' }}</td>
+                  </ng-container>
+                  
                   <ng-container matColumnDef="currency">
                     <th mat-header-cell *matHeaderCellDef>Currency</th>
                     <td mat-cell *matCellDef="let expense">{{ expense.currency }}</td>
